@@ -1,0 +1,147 @@
+﻿
+@{
+    ViewBag.Title = "AssignTeacher";
+}
+
+<h2>AssignTeacher</h2>
+
+<form method="POST">
+    <table>
+        <tr>
+            <td> Department </td>
+            <td> <select id="Department">
+                     <option value="">Select Department</option>
+                     @foreach (var department in ViewBag.Departments)
+                     {
+                         <option value="@department.Id"> @department.Code</option>
+                     }
+                 </select></td>
+        </tr>
+        
+        
+        <tr>
+            <td> Teacher </td>
+            <td>
+                <select id="Teacher">          
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td> Name </td>
+            <td>
+                <input id="Name" name="Name"/>
+              
+            </td>
+        </tr>
+        
+        <tr>
+            <td> Course </td>
+            <td>
+                <input type="text" name="Name" id="Name" readonly="readonly" class="form-control" />
+                <input type="text" name="courseCredit" id="courseCredit" readonly="readonly" class="form-control" />
+                @*//<select id="Course"></select>*@
+            </td>
+        </tr>
+
+    </table>
+</form>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+    <script>
+    $(document).ready(function () {
+        $("#Department").on('change', function () {
+            //alert('test');
+            var departmentId = $('#Department option:selected').val();
+            //alert(Department);
+            $.ajax({
+                type: 'GET',
+                data: { departmentId: departmentId },
+                url: '@Url.Action("GetTeacherById", "AssignToTeachers")',
+                success: function (result) {
+                    //alert(result);
+                    var s = '<option value="-1">Select Teacher</option>';
+                    for (var i = 0; i < result.length; i++) {
+                        s += '<option value="' + result[i].Id + '">' + result[i].Name + '</option>';
+                    }
+                    $('#Teacher').html(s);
+                }
+
+            });
+        });
+    });
+
+    //.............
+
+    $(document).ready(function () {
+        $("#Department").on('change', function () {
+            //alert('test');
+            var departmentId = $('#Department option:selected').val();
+            //alert(Department);
+            $.ajax({
+                type: 'GET',
+                data: { departmentId: departmentId },
+                url: '@Url.Action("GetCourseById", "AssignToTeachers")',
+                success: function (result) {
+                    //alert(result);
+                    var s = '<option value="-1">Select Coures</option>';
+                    for (var i = 0; i < result.length; i++) {
+                        s += '<option value="' + result[i].Id + '">' + result[i].Code + '</option>';
+                    }
+                    $('#Course').html(s);
+                }
+
+            });
+        });
+    });
+    //.............
+    $(document).ready(function () {
+        $("#Teacher").on('change', function () {
+            //alert('test');
+            var departmentId = $('#Teacher option:selected').val();
+            //alert(Department);
+            $.ajax({
+                type: 'GET',
+                data: { departmentId: departmentId },
+                url: '@Url.Action("GetTeacherNameById", "AssignToTeachers")',
+                    success: function (result) {
+                      // alert(result);
+
+                        $('#Name').val(result[0].CreditToBeTaken);
+
+                    }
+
+                });
+            });
+        });
+        //.............
+        @*$("#Teacher").change(function () {
+
+            var teacherSelected = $("#Teacher").val();
+                var jsonData = { TeacherId: teacherSelected };
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetTeacherById1", "AssignToTeachers")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(jsonData),
+                    dataType: "json",
+                    success: function (data) {
+
+                        alert(data);
+
+                        $("#creditTaken").val("Alam");
+                 
+
+                    },
+
+                });
+
+                if (TeacherId == 0) {
+                    $("#creditTaken").val("");
+           
+                }
+                return false;
+            });*@
+        //.............
+    </script>
+}

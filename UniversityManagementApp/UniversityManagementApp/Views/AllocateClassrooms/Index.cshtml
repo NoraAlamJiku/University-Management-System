@@ -1,0 +1,76 @@
+﻿        @model IEnumerable<UniversityManagementApp.Models.AllocateClassroom>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h3>View Class Schedule and Room Allocation Information</h3>
+<hr />
+ @using (Html.BeginForm())
+ {
+    <div class="form-horizontal">
+        <div class="form-group">          
+                <label for="DepartmentId" class="control-label col-md-2"> Department : </label>
+                <div class="col-md-10">                   
+                        <select name="DepartmentId" id="DepartmentId" class="form-control" onchange="form.submit()">
+                            <option value="">--Select--</option>
+                            @foreach (var department in ViewBag.departments)
+                            {
+                                <option value="@department.Id">@department.Name</option>
+                            }
+                        </select>                   
+                </div>        
+        </div>
+    </div>
+ }
+
+        <table class="table table-striped table-bordered">
+    <tr>
+        <th style="text-align: center">
+            @Html.DisplayName("Course Code")
+        </th>
+        <th style="text-align: center">
+            @Html.DisplayNameFor(model => model.Course.Name)
+        </th>
+        <th style="text-align: center">
+            @Html.DisplayName("Schedule Info")
+        </th>
+
+    </tr>
+
+    @foreach (var item in Model.GroupBy(i => i.Course))
+    {
+        <tr>
+            <td>
+                @Html.Encode(item.Key.Code)
+            </td>
+            <td>
+                @Html.Encode(item.Key.Name)
+            </td>
+            <td>
+                @foreach (var data in item)
+                {
+                    <table>
+                        @if (data.RoomNo != null)
+                        {
+                            <tr>
+                                @Html.Encode("R. No : " + data.RoomNo.RoomNumber),
+                                @Html.Encode("Day : " + data.DayName.Name.Substring(0, 3)),
+                                @Html.Encode("Start Time : " + (DateTime.Today.Add(data.StartTime1)).ToShortTimeString()) -
+                                @Html.Encode("End Time :  " + (DateTime.Today.Add(data.EndTime1)).ToShortTimeString());
+                            </tr>
+                        }
+                        @if (data.RoomNo == null)
+                        {
+                            <tr>
+                                @Html.Encode("Not Scheduled Yet")
+                            </tr>
+                        }
+                    </table>
+                }
+            </td>
+        </tr>
+    }
+
+</table>
+

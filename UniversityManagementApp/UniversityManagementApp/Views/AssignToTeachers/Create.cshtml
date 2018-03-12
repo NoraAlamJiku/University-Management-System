@@ -1,0 +1,240 @@
+﻿@model UniversityManagementApp.Models.AssignToTeacher
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Assign To Teacher</h2>
+
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.DepartmentId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("DepartmentId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TeacherId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("TeacherId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.TeacherId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CreditToBeTaken, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CreditToBeTaken, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CreditToBeTaken, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.RemainingCredit, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.RemainingCredit, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.RemainingCredit, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CourseId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*@Html.DropDownList("CourseId", null, htmlAttributes: new { @class = "form-control" })*@
+                @Html.DropDownListFor(model => model.CourseId, new SelectList((System.Collections.IEnumerable)ViewData["CourseId"], "Value", "Text"), new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.CourseId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Credit, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Credit, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Credit, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/jquery-1.10.2.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#DepartmentId").on('change', function() {
+                $('#CreditToBeTaken').val("");
+                $('#RemainingCredit').val("");
+                $('#Credit').val("");
+                $('#Name').val("");
+                var departmentId = $('#DepartmentId option:selected').val();
+                $.ajax({
+                    type: 'GET',
+                    data: { departmentId: departmentId },
+                    url: '@Url.Action("GetTeacherById", "AssignToTeachers")',
+                    success: function(result) {
+
+                        var s = '<option value="-1">Select Teacher</option>';
+                        for (var i = 0; i < result.length; i++) {
+                            s += '<option value="' + result[i].Id + '">' + result[i].Name + '</option>';
+                        }
+                        $('#TeacherId').html(s);
+                    }
+
+                });
+
+            });
+
+
+            $("#DepartmentId").on('change', function() {
+
+                var departmentId = $('#DepartmentId option:selected').val();
+
+                $.ajax({
+                    type: 'GET',
+                    data: { departmentId: departmentId },
+                    url: '@Url.Action("GetCourseById", "AssignToTeachers")',
+                    success: function(result) {
+                        var s = '<option value="-1">Select Course</option>';
+                        for (var i = 0; i < result.length; i++) {
+                            s += '<option value="' + result[i].Id + '">' + result[i].Code + '</option>';
+                        }
+                        $('#CourseId').html(s);
+                    }
+
+                });
+                // alert("Taken " + creditTaken);
+            });
+
+
+            $("#TeacherId").on('change', function() {
+                $('#CreditToBeTaken').val("");
+                $('#RemainingCredit').val("");
+                var departmentId = $('#TeacherId option:selected').val();
+                $.ajax({
+                    type: 'GET',
+                    data: { departmentId: departmentId },
+                    url: '@Url.Action("GetTeacherNameById", "AssignToTeachers")',
+                    success: function(result) {
+                        $.each(result, function(key, value) {
+
+                           // var creditTaken = value.CreditToBeTaken;
+
+                            $("#CreditToBeTaken").val(value.CreditToBeTaken);
+
+
+                            var departmentId = $('#TeacherId option:selected').val();
+                            $.ajax({
+                                type: 'GET',
+                                data: { departmentId: departmentId },
+                                url: '@Url.Action("GetRemaingingCreditById", "AssignToTeachers")',
+                                success: function(result1) {
+
+                                    if (result1 == "0") {
+
+                                        $("#RemainingCredit").val(value.CreditToBeTaken);
+                                    } else {
+                                        $('#RemainingCredit').val(result1);
+                                    }
+
+
+                                }
+
+                            });
+                        });
+                    }
+                });
+            }); //end
+
+
+            $("#CourseId").on('change', function() {
+                var departmentId = $('#CourseId option:selected').val();
+                $.ajax({
+                    type: 'GET',
+                    data: { departmentId: departmentId },
+                    url: '@Url.Action("GetCourseNameById", "AssignToTeachers")',
+                    success: function(result) {
+
+                        $('#Name').val(result[0].Name);
+                        $('#Credit').val(result[0].Credit);
+
+                        //.....................
+
+
+                        var departmentId = $('#TeacherId option:selected').val();
+                        $.ajax({
+                            type: 'GET',
+                            data: { departmentId: departmentId },
+                            url: '@Url.Action("GetRemaingingCreditById", "AssignToTeachers")',
+                            success: function(result1) {
+                                //............
+
+
+                                var val1 = parseFloat($('#RemainingCredit').val());
+                                var val2 = parseFloat($('#Credit').val());
+                                var val = val1 - val2;
+                                if (val < 0) {
+                                    var action = confirm('Remaining credit is ' + val + '. Are you sure, you want to assign more credit?');
+                                    if (action == false) {
+                                        $('#CreditToBeTaken').val("");
+                                        $("#RemainingCredit").val("");
+                                        $('#Name').val("");
+                                        $('#Credit').val("");
+                                        return false;
+                                    }
+
+                                }
+
+                                if (result1 > 0) {
+                                    $("#RemainingCredit").val(result1 - result[0].Credit);
+                                }
+                                else {
+                                    if (result1==0) {
+                                        var val11 = parseFloat($('#CreditToBeTaken').val());
+                                        $("#RemainingCredit").val(val11 - result[0].Credit);
+                                    } else {
+                                        $("#RemainingCredit").val(result1 - result[0].Credit);
+                                    }
+
+                                }
+
+                            }
+
+                        });
+
+
+                    }
+
+                });
+
+
+            }); //Endddddd
+            });
+    </script>
+}
+
+
+

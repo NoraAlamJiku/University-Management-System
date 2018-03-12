@@ -1,0 +1,215 @@
+﻿@model UniversityManagementApp.Models.AllocateClassroom
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<h2>Allocate Classroom</h2>
+<h3 style="text-align: center"><label id="displayMsg"></label> </h3>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.DepartmentId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("DepartmentId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CourseId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("CourseId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.CourseId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.RoomNoId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("RoomNoId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.RoomNoId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.DayNameId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("DayNameId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.DayNameId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StartTime, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="time" id="StartTime" name="StartTime" class="form-control" />
+                @*@Html.EditorFor(model => model.From, new { htmlAttributes = new { @class = "form-control" } })
+    @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })*@
+            </div>
+            </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.EndTime, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="time" id="EndTime" name="EndTime" class="form-control" />
+                @*@Html.EditorFor(model => model.To, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" id="submit" name="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+    
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+   <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $("#DepartmentId").change(function () {
+
+                $("#displayMsg").text("");
+                var departmentId = $("#DepartmentId").val();
+                var jsonData = { deptId: departmentId };
+                $("#CourseId").empty();
+                $("#CourseId").append('<option value=0> Select </option>');
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetCoursesByDeptId", "AllocateClassrooms")',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(jsonData),
+                    dataType: "json",
+                    success: function (data) {
+                        alert(data);
+                        $.each(data, function (key, value) {
+                            $("#CourseId").append('<option value=' + value.Id + '>' + value.Code + '</option>');
+                        });
+                    }
+                });
+            });
+
+            $("#submit").click(function () {
+                var errorValue = 0;
+                ResetErrorLabel();
+                var departmentId = $("#DepartmentId").val();
+                if (departmentId == 0) {
+                    $("#departmentErroMessage").text("Select One Department!");
+                    errorValue = 1;
+
+                }
+
+                var courseId = $("#CourseId").val();
+                if (courseId == 0) {
+                    $("#courseErrorMessage").text("Select One Course!");
+                    errorValue = 1;
+                }
+
+                var roomId = $("#RoomNoId").val();
+                if (roomId == 0) {
+                    $("#roomErrorMessage").text("Select One Room!");
+                    errorValue = 1;
+                }
+
+                var dayId = $("#DayNameId").val();
+                if (dayId == 0) {
+                    $("#dayErrorMessage").text("Select One Day!");
+                    errorValue = 1;
+                }
+
+                var time = $("#StartTime").val();
+                var startTime1 = $("#StartTime").val();
+                var endTime1 = $("#EndTime").val();
+
+                if (time == "") {
+
+                    $("#startTimeErrorMessage").text("Start time is Required!");
+                    errorValue = 1;
+                }
+
+                var hour = parseInt(time.substr(0, 2));
+                var minute = parseInt(time.substr(3, 5));
+                var startTime = hour * 60 + minute;
+
+
+                time = $("#EndTime").val();
+                if (time == "") {
+
+                    $("#endTimeErrorMessage").text("End time is Required!");
+                    errorValue = 1;
+                }
+
+                hour = parseInt(time.substr(0, 2));
+                minute = parseInt(time.substr(3, 5));
+                var endTime = hour * 60 + minute;
+
+
+                if (errorValue == 1) {
+                    return false;
+                }
+
+                if (startTime == endTime) {
+                    $("#displayMsg").text("Its not Possible to create Zero Minute Duration class");
+                    return false;
+                } else if (startTime < endTime) {
+                    var jsonData = { DepartmentId: departmentId, CourseId: courseId, RoomNoId: roomId, DayNameId: dayId, StartTime: startTime, EndTime: endTime, StartTime1: startTime1, EndTime1: endTime1 };
+
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("SaveRoomSchedule", "AllocateClassrooms")',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsonData),
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == true) {
+                                $("#displayMsg").text("Class Room Schedule Saved Successfully!");
+                                $("#departmentId").prop("selectedIndex", 0);
+                                $("#courseId").prop("selectedIndex", 0);
+                                $("#roomId").prop("selectedIndex", 0);
+                                $("#dayId").prop("selectedIndex", 0);
+                                $("#startTime").val('mm/dd/yyyy');
+                                $("#endTime").val('mm/dd/yyyy');
+                                return false;
+                            } else {
+                                $("#displayMsg").text("Overlapping Problem, Change Time or Day.");
+                                return false;
+                            }
+                        }
+                    });
+
+                } else {
+                    $("#displayMsg").text("Invalid Time chosen");
+                }
+
+
+                return false;
+            });
+
+        });
+
+
+        function ResetErrorLabel() {
+            $("#deptErrorMessage").text("");
+            $("#courseErrorMessage").text("");
+            $("#roomErrorMessage").text("");
+            $("#dayErrorMessage").text("");
+            $("#startTimeErrorMessage").text("");
+            $("#endTimeErrorMessage").text("");
+        }
+
+    </script>
+}
